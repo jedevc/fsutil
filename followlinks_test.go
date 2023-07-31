@@ -23,7 +23,7 @@ func TestFollowLinks(t *testing.T) {
 
 	require.NoError(t, apply.Apply(tmpDir))
 
-	out, err := FollowLinks(tmpDir, []string{"l2", "bar"})
+	out, err := FollowLinks(NewFS(tmpDir), []string{"l2", "bar"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"bar", "dir/foo", "dir/l1", "l2"})
@@ -39,7 +39,7 @@ func TestFollowLinksLoop(t *testing.T) {
 	)
 	require.NoError(t, apply.Apply(tmpDir))
 
-	out, err := FollowLinks(tmpDir, []string{"l1", "l3"})
+	out, err := FollowLinks(NewFS(tmpDir), []string{"l1", "l3"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"l1", "l2", "l3"})
@@ -62,7 +62,7 @@ func TestFollowLinksAbsolute(t *testing.T) {
 	)
 	require.NoError(t, apply.Apply(tmpDir))
 
-	out, err := FollowLinks(tmpDir, []string{"dir/l1"})
+	out, err := FollowLinks(NewFS(tmpDir), []string{"dir/l1"})
 	require.NoError(t, err)
 
 	require.Equal(t, []string{"baz", "dir/l1", "foo/bar"}, out)
@@ -79,7 +79,7 @@ func TestFollowLinksAbsolute(t *testing.T) {
 	)
 	require.NoError(t, apply.Apply(tmpDir))
 
-	out, err = FollowLinks(tmpDir, []string{"dir/l1"})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"dir/l1"})
 	require.NoError(t, err)
 
 	require.Equal(t, []string{"baz", "dir/l1", "foo/bar"}, out)
@@ -88,18 +88,18 @@ func TestFollowLinksAbsolute(t *testing.T) {
 func TestFollowLinksNotExists(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	out, err := FollowLinks(tmpDir, []string{"foo/bar/baz", "bar/baz"})
+	out, err := FollowLinks(NewFS(tmpDir), []string{"foo/bar/baz", "bar/baz"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"bar/baz", "foo/bar/baz"})
 
 	// root works fine with empty directory
-	out, err = FollowLinks(tmpDir, []string{"."})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"."})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string(nil))
 
-	out, err = FollowLinks(tmpDir, []string{"f*/foo/t*"})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"f*/foo/t*"})
 	require.NoError(t, err)
 
 	require.Equal(t, []string{"f*/foo/t*"}, out)
@@ -108,7 +108,7 @@ func TestFollowLinksNotExists(t *testing.T) {
 func TestFollowLinksNormalized(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	out, err := FollowLinks(tmpDir, []string{"foo/bar/baz", "foo/bar"})
+	out, err := FollowLinks(NewFS(tmpDir), []string{"foo/bar/baz", "foo/bar"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"foo/bar"})
@@ -127,12 +127,12 @@ func TestFollowLinksNormalized(t *testing.T) {
 	)
 	require.NoError(t, apply.Apply(tmpDir))
 
-	out, err = FollowLinks(tmpDir, []string{"dir/l1", "foo/bar"})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"dir/l1", "foo/bar"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"dir/l1", "foo"})
 
-	out, err = FollowLinks(tmpDir, []string{"dir/l2", "foo", "foo/bar"})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"dir/l2", "foo", "foo/bar"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string(nil))
@@ -159,17 +159,17 @@ func TestFollowLinksWildcard(t *testing.T) {
 	)
 	require.NoError(t, apply.Apply(tmpDir))
 
-	out, err := FollowLinks(tmpDir, []string{"dir/l*"})
+	out, err := FollowLinks(NewFS(tmpDir), []string{"dir/l*"})
 	require.NoError(t, err)
 
 	require.Equal(t, []string{"baz", "dir/l*", "foo/bar1", "foo/bar2"}, out)
 
-	out, err = FollowLinks(tmpDir, []string{"dir"})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"dir"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"dir"})
 
-	out, err = FollowLinks(tmpDir, []string{"dir", "dir/*link"})
+	out, err = FollowLinks(NewFS(tmpDir), []string{"dir", "dir/*link"})
 	require.NoError(t, err)
 
 	require.Equal(t, out, []string{"dir", "foo/bar3"})
